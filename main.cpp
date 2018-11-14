@@ -17,6 +17,7 @@ struct Input
 struct Output
 {
     bool hasSolution;
+    // key: the denomination; value: how many denomination
     std::map<int, int, std::greater <int>> solution;
 };
 
@@ -94,44 +95,66 @@ void writeFile(Output output)
 Output optimalPay(Input input)
 {
     Output output;
-    if(input.amount < 0 || input.denominations.size() <= 0)
+    if(input.amount <= 0 || input.denominations.size() <= 0)
     {
         output.hasSolution = false;
         return output;
     }
 
-	// first part: construct the c-table and s-table
+    /*
+     * first step: construct the c-table and s-table
+     */
+    // cTable is used to store how many denomination in an optimal solution
     int cTable [input.amount+1];
+    // sTable stores the preceding amount that can leads to an optimal solution to the current amount.
     int sTable [input.amount+1];
+
     cTable [0] = 0;
-    sTable [0] = -1;
-	for(int i=1; i<= input.amount; i++)
-	{
-	    
-        int quotient;
-        int amount = input.amount;
-        int min = std::numeric_limits<int>::max();
-	    for (int d : input.denominations)
+    sTable [0] = 0;
+    int infinity = std::numeric_limits<int>::max();
+    for(int amount=1; amount<= input.amount; amount++)
+    {
+        int minCost = infinity;
+        sTable [amount] = -1;
+        for (int d : input.denominations)
         {
-            quotient = 0;
-    
-            if(amount >= d)
+            int cost = 1;
+            if((amount - d >= 0) && (cTable[amount - d] != infinity))
             {
-                quotient = amount / d;
-                amount = amount % d;
+                cost = 1 + cTable[amount - d];
+                if(cost < minCost)
+                {
+                    minCost = cost;
+                    sTable [amount] = amount - d;
+                }
             }
-    
-            
         }
-        
-        if(amount != 0)
-        {
-            output.hasSolution = false;
-        }
-	}
-	// second part: construct the solution
+        cTable[amount] = minCost;
+    }
+
+    /*
+     * second step: construct the solution
+     */
     std::map<int, int, std::greater <int>> solution;
-   
+    if(sTable [input.amount] == -1)
+    {
+        output.hasSolution = false;
+    }
+    else
+    {
+        output.hasSolution = true;
+
+        int amount = input.amount;
+        int difference;
+        do
+        {
+            difference = amount - sTable[amount];
+            amount = sTable[amount];
+            solution[difference]++;
+        }
+        while(amount);
+        output.solution = solution;
+    }
     return output;
 }
 

@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1542236799 source:/nfs/home/t/ta_li/git/OptimalPay/main.cpp
+	<iostream>
+	<vector>
+	<map>
+	<fstream>
+	<limits>
+
