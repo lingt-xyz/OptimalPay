@@ -88,8 +88,9 @@ void writeFile(Output output)
     }
 }
 
+
 /**
- * Greedy algorithm to solve the optimal pay problem.
+ * Dynamic programming to solve the optimal pay problem.
  */
 Output optimalPay(Input input)
 {
@@ -100,8 +101,34 @@ Output optimalPay(Input input)
         return output;
     }
 
+	// first part: construct the c table
+    int cTable [input.amount][input.denominations.size()];
+	for(int i=0; i<= input.amount; i++)
+	{
+        int quotient;
+	    for (int d : input.denominations)
+        {
+            quotient = 0;
+    
+            if(amount >= d)
+            {
+                quotient = amount / d;
+                amount = amount % d;
+            }
+    
+            if(quotient)
+            {
+                solution[d] = quotient;
+            }
+        }
+        
+        if(amount != 0)
+        {
+            output.hasSolution = false;
+        }
+	}
+	// second part: construct the solution
     std::map<int, int, std::greater <int>> solution;
-    int quotient;
     int amount = input.amount;
     for (int d : input.denominations)
     {
