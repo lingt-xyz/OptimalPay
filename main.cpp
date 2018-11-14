@@ -2,9 +2,8 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <limits>
 
-// alias of descending order Map
-using descendingMap = std::map<int, int, std::greater <int>>;
 
 const std::string INPUT_FILE_NAME = "input.txt";
 const std::string OUTPUT_FILE_NAME = "output.txt";
@@ -95,17 +94,23 @@ void writeFile(Output output)
 Output optimalPay(Input input)
 {
     Output output;
-    if(input.amount <= 0 || input.denominations.size() <= 0)
+    if(input.amount < 0 || input.denominations.size() <= 0)
     {
         output.hasSolution = false;
         return output;
     }
 
-	// first part: construct the c table
-    int cTable [input.amount][input.denominations.size()];
-	for(int i=0; i<= input.amount; i++)
+	// first part: construct the c-table and s-table
+    int cTable [input.amount+1];
+    int sTable [input.amount+1];
+    cTable [0] = 0;
+    sTable [0] = -1;
+	for(int i=1; i<= input.amount; i++)
 	{
+	    
         int quotient;
+        int amount = input.amount;
+        int min = std::numeric_limits<int>::max();
 	    for (int d : input.denominations)
         {
             quotient = 0;
@@ -116,10 +121,7 @@ Output optimalPay(Input input)
                 amount = amount % d;
             }
     
-            if(quotient)
-            {
-                solution[d] = quotient;
-            }
+            
         }
         
         if(amount != 0)
@@ -129,34 +131,7 @@ Output optimalPay(Input input)
 	}
 	// second part: construct the solution
     std::map<int, int, std::greater <int>> solution;
-    int amount = input.amount;
-    for (int d : input.denominations)
-    {
-        quotient = 0;
-
-        // greedy choice: always choose the largest denomination
-        if(amount >= d)
-        {
-            quotient = amount / d;
-            amount = amount % d;
-        }
-
-        // ignore the unused denomination
-        if(quotient)
-        {
-            solution[d] = quotient;
-        }
-    }
-
-    if(amount != 0)
-    {
-        output.hasSolution = false;
-    }
-    else
-    {
-        output.hasSolution = true;
-        output.solution = solution;
-    }
+   
     return output;
 }
 
